@@ -1,0 +1,4 @@
+incrLaSVM
+=========
+
+Incremental LaSVM
