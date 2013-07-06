@@ -50,13 +50,13 @@ II. Incremental training
 ---------------------
 For building the model incrementally with persistence mode the command that needs to be issued is, 
 
-la_svm –i 1 –m 2000 \<input_file\> \<model_file\>
+la_incr –i 1 –m 2000 \<input_file\> \<model_file\>
 
 Here, it assumes that above mentioned persistence files are already present. 
 
 For building the model incrementally without persistence mode the command that needs to be issued is, 
 
-la_svm –i 2 –m 2000 \<input_file\> \<model_file\>
+la_incr –i 2 –m 2000 \<input_file\> \<model_file\>
 
 
 III. Predictions
