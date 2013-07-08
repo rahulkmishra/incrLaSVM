@@ -9,6 +9,7 @@ It supports only binary classification. LaSVM source code is mix of C and C++.
 It can be freely downloaded from   http://leon.bottou.org/_media/projects/lasvm-source-1.1.tar.gz . 
 
 Here, the incremental extension to the online algorithm is carried out. 
+
 TODO : Further integrating SVMSOANAL will be next agenda. Code is already available at http://image.diku.dk/igel/solasvm/2nd-order-LASVM.tar.gz
 
 Paper is available [http://image.diku.dk/igel/paper/SOSMOISVMOaAL.pdf]
