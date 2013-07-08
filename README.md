@@ -32,7 +32,7 @@ Examples:
 
 Sample files for training and testing are provided in sample folder.
 
-Source file is data.csv and from this 30% test data is prepared as "test.sparse.scale"  and rest are in "train.sparse.scale"
+Source file is data.csv and from this 30% balanced test data is prepared as "test.sparse.scale"  and rest balanced data are in "train.sparse.scale"
 
 The scaling parameter is provided in range.txt file.
 
