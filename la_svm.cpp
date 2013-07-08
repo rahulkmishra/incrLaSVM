@@ -1025,16 +1025,28 @@ void libsvm_save_history(char *input_file_name, char *model_file_name)
 	strcpy(t,model_file_name);
 	strcat(t,".history");
 
-	ofstream f;
-	f.open(t,ios::out|ios::trunc);
-	if(f.fail())
+
+	ifstream histTemp;
+	histTemp.open(input_file_name);
+
+	if(histTemp.fail())
+	{
+		fprintf(stderr,"Can't Read History.temp file \"%s\"\n",input_file_name);
+		exit(1);
+	}
+
+	ofstream hist;
+	hist.open(t,ios::out|ios::trunc);
+	if(hist.fail())
 	{
 		fprintf(stderr,"Can't create history file \"%s\"\n",t);
 		exit(1);
 	}
 
+	hist << histTemp.rdbuf();
 
-	f.close();
+	hist.close();
+	histTemp.close();
 }
 
 
@@ -1056,10 +1068,10 @@ int main(int argc, char **argv)
 	std::cout <<"Saving Model...." << std::endl;
 	libsvm_save_model(model_file_name);
 
-//	if(incrmode==1)
-//	{
-//		libsvm_save_history(input_file_name,model_file_name);
-//	}
+	if(incrmode==1)
+	{
+		libsvm_save_history(input_file_name,model_file_name);
+	}
 
 	time_t et;
 	et = time(NULL);

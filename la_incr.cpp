@@ -1203,28 +1203,27 @@ void libsvm_save_history(char *temp_file_name, char *model_file_name)
 	strcpy(t,model_file_name);
 	strcat(t,".history");
 
-	ofstream f;
-	f.open(t,ios::out|ios::trunc);
-	if(f.fail())
-	{
-		fprintf(stderr,"Can't create history file \"%s\"\n",t);
-		exit(1);
-	}
-
 	ifstream histTemp;
 	histTemp.open(temp_file_name);
 
-	if(f.fail())
+	if(histTemp.fail())
 	{
-		fprintf(stderr,"Can't Read History.temp file \"%s\"\n",temp_file_name);
+		fprintf(stderr,"Can't Read history.temp file \"%s\"\n",temp_file_name);
 		exit(1);
 	}
 
 	ofstream hist;
 	hist.open(t,ios::out|ios::trunc);
+	if(hist.fail())
+	{
+		fprintf(stderr,"Can't create history file \"%s\"\n",t);
+		exit(1);
+	}
+
 	hist << histTemp.rdbuf();
 
-	f.close();
+	hist.close();
+	histTemp.close();
 }
 
 
