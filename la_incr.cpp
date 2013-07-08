@@ -778,8 +778,7 @@ void dump_kcache_state(lasvm_kcache_t *kcache, char *model_file_name)
 		fprintf(stderr,"Can't create kcache file \"%s\"\n",t);
 		exit(1);
 	}
-	// Get each fields and dump along with counters
-	// counters would be helpful for list while loading this data from file to structure
+	// Get each fields and dump
 
 	//write it to text file
 	f<<kcache->maxsize<<endl;
@@ -1036,6 +1035,7 @@ void train_online(char *model_file_name, char *temp_file_name)
 		}
 
 		int index2;
+		//process all the old SVs
 		for(i=1;i<msv;i++)
 		{
 			if(inew.size()==0) break;
@@ -1057,31 +1057,13 @@ void train_online(char *model_file_name, char *temp_file_name)
 		load_kcache_state(kcache, model_file_name);
 		lasvm_kcache_set_maximum_size(kcache, cache_size*1024*1024);
 		printf("set cache size %lld\n",cache_size);
-		load_data_file(temp_file_name);
 		load_lasvm_state(sv, kcache, model_file_name);
 		sv->kernel = kcache;
-
 
 		printf("\n--- data loaded--- \n");
 
 		int index2;
-	//	printf("-----msv=%d\n",msv);
 
-		int c1=0,c2=0;
-//		for(i=0;i<m;i++)
-//		{
-//			if(Y[i]==1 && c1<5)
-//			{
-//				lasvm_process(sv,i,(double) Y[i]); c1++;
-//				make_old(i);
-//			}
-//			if(Y[i]==-1 && c2<5)
-//			{
-//				lasvm_process(sv,i,(double) Y[i]); c2++;
-//				make_old(i);
-//			}
-//			if(c1==5 && c2==5) break;
-//		}
 		for(i=1;i<history_size;i++)
 		{
 			if(inew.size()==0) break;
@@ -1183,7 +1165,7 @@ void train_online(char *model_file_name, char *temp_file_name)
 		}
 
 		inew.resize(0);iold.resize(0); // start again for next epoch..
-		for(i=0;i<m;i++) inew.push_back(i);
+		for(i=0;i<m;i++) inew.push_back(i); //TODO: Do we reprocess entire data or only new data?
 
 		et = time(NULL);
 		elapsedTime = difftime(et,st);
@@ -1215,7 +1197,7 @@ void train_online(char *model_file_name, char *temp_file_name)
 	lasvm_kcache_destroy(kcache);
 }
 
-void libsvm_save_history(char *input_file_name, char *model_file_name)
+void libsvm_save_history(char *temp_file_name, char *model_file_name)
 {
 	char t[1024];
 	strcpy(t,model_file_name);
@@ -1229,9 +1211,20 @@ void libsvm_save_history(char *input_file_name, char *model_file_name)
 		exit(1);
 	}
 
+	ifstream histTemp;
+	histTemp.open(temp_file_name);
+
+	if(f.fail())
+	{
+		fprintf(stderr,"Can't Read History.temp file \"%s\"\n",temp_file_name);
+		exit(1);
+	}
+
+	ofstream hist;
+	hist.open(t,ios::out|ios::trunc);
+	hist << histTemp.rdbuf();
 
 	f.close();
-
 }
 
 
@@ -1394,12 +1387,12 @@ int preprocess_data(const char* temp_file_name, const char *input_file_name, con
 
 	int examples_old=0,examples_incr=0;
 
-	if(incrmode==2)
+	if(incrmode==2) //append new data to previous SVs
 	{
 		examples_old = preprocess_model(fp_temp, model_file_name);
 		examples_incr = append_data(fp_temp, input_file_name);
 	}
-	else
+	else //append new data to historical data
 	{
 		char history_file_name[1024];
 		strcpy(history_file_name,model_file_name);
@@ -1473,8 +1466,6 @@ int main(int argc, char **argv)
 	printf("\n");
 	printf("la INCR\n");
 	printf("______\n");
-	//clock_t startTime = clock();
-	//time_t* lt_temp;
 	time_t st = time(NULL);
 	char input_file_name[1024];
 	char model_file_name[1024];
@@ -1487,9 +1478,9 @@ int main(int argc, char **argv)
 
 	preprocess_data(temp_file_name, input_file_name, model_file_name);
 
-	//load_data_file(temp_file_name);
-	//
-	//printf("\n--- data loaded--- \n");
+	load_data_file(temp_file_name);
+
+	printf("\n--- data loaded--- \n");
 
 //printing if any error in loading data precautionary.
 //	for(int i=0;i<m;i++)
@@ -1507,13 +1498,14 @@ int main(int argc, char **argv)
 //	}
 
 	train_online(model_file_name,temp_file_name);
+
 	std::cout <<"Saving Model...." << std::endl;
 	libsvm_save_model(model_file_name);
 
 
-	if(incrmode==1)
+	if(incrmode==1)//only in persistence mode
 	{
-		libsvm_save_history(input_file_name,model_file_name);
+		libsvm_save_history(temp_file_name,model_file_name);
 	}
 
 	time_t et;
