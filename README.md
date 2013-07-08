@@ -24,6 +24,7 @@ It provides three executables, namely,
 * la_svm 
 * la_incr
 * la_test
+
 la_svm is used only for 1st time model building. For incrementally building the model based on the 1st model (built using la_svm), la_incr is used. 
 la_test is used for predictions.
 
