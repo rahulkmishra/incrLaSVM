@@ -713,7 +713,6 @@ int select(lasvm_t *sv) // selection strategy
  */
 void dump_lasvm_state(lasvm_t *sv, char *model_file_name)
 {
-
 	char t[1024];
 	strcpy(t,model_file_name);
 	strcat(t,".lasvm");
@@ -731,27 +730,36 @@ void dump_lasvm_state(lasvm_t *sv, char *model_file_name)
 
 	//write it to text file
 	f<<sv->sumflag<<endl;
-	f<<sv->cp<<endl;
-	f<<sv->cn<<endl;
+	//f<<sv->cp<<endl;
+	//f<<sv->cn<<endl;
 	f<<sv->maxl<<endl;
 	f<<sv->s<<endl;
 	f<<sv->l<<endl;
-	int length = sv->maxl;
+	int length = sv->l;
 	for(int i=0; i<length;i++)
 		f<<sv->alpha[i]<<" ";
 	f<<endl;
 
-	for(int i=0; i<length;i++)
-		f<<sv->cmin[i]<<" ";
-	f<<endl;
-
-	for(int i=0; i<length;i++)
-		f<<sv->cmax[i]<<" ";
-	f<<endl;
+//	for(int i=0; i<length;i++)
+//		f<<sv->cmin[i]<<" ";
+//	f<<endl;
+//
+//	for(int i=0; i<length;i++)
+//		f<<sv->cmax[i]<<" ";
+//	f<<endl;
 
 	for(int i=0; i<length;i++)
 		f<<sv->g[i]<<" ";
 	f<<endl;
+
+	int* save_sv= new int[length];
+	lasvm_get_sv(sv,save_sv);
+
+	for(int i=0; i<length;i++)
+		f<<save_sv[i]<<" ";
+	f<<endl;
+
+
 
 	f<<sv->gmin<<endl;
 	f<<sv->gmax<<endl;
@@ -768,67 +776,67 @@ void dump_lasvm_state(lasvm_t *sv, char *model_file_name)
 void dump_kcache_state(lasvm_kcache_t *kcache, char *model_file_name)
 {
 	char t[1024];
-	strcpy(t,model_file_name);
-	strcat(t,".lacache");
+		strcpy(t,model_file_name);
+		strcat(t,".lacache");
 
-	ofstream f;
-	f.open(t,ios::out|ios::trunc);
-	if(f.fail())
-	{
-		fprintf(stderr,"Can't create kcache file \"%s\"\n",t);
-		exit(1);
-	}
-	// Get each fields and dump
+		ofstream f;
+		f.open(t,ios::out|ios::trunc);
+		if(f.fail())
+		{
+			fprintf(stderr,"Can't create kcache file \"%s\"\n",t);
+			exit(1);
+		}
+		// Get each fields and dump along with counters
+		// counters would be helpful for list while loading this data from file to structure
 
-	//write it to text file
-	f<<kcache->maxsize<<endl;
-	f<<kcache->cursize<<endl;
-	f<<kcache->l<<endl;
-	int length = kcache->l;
+		//write it to text file
+		f<<kcache->maxsize<<endl;
+		f<<kcache->cursize<<endl;
+		f<<kcache->l<<endl;
+		int length = kcache->l;
 
-	for(int i=0; i<length;i++)
-		f<<kcache->i2r[i]<<" ";
-	f<<endl;
+		for(int i=0; i<length;i++)
+			f<<kcache->i2r[i]<<" ";
+		f<<endl;
 
-	for(int i=0; i<length;i++)
-		f<<kcache->r2i[i]<<" ";
-	f<<endl;
+		for(int i=0; i<length;i++)
+			f<<kcache->r2i[i]<<" ";
+		f<<endl;
 
-	for(int i=0; i<length;i++)
-		f<<kcache->rsize[i]<<" ";
-	f<<endl;
+		for(int i=0; i<length;i++)
+			f<<kcache->rsize[i]<<" ";
+		f<<endl;
 
-	for(int i=0; i<length;i++)
-		f<<kcache->rdiag[i]<<" ";
-	f<<endl;
+		for(int i=0; i<length;i++)
+			f<<kcache->rdiag[i]<<" ";
+		f<<endl;
 
 
-	for(int i=0; i<length;i++)
-		f<<kcache->rnext[i]<<" ";
-	f<<endl;
+	//	for(int i=0; i<length;i++)
+	//		f<<kcache->rnext[i]<<" ";
+	//	f<<endl;
+	//
+	//	for(int i=0; i<length;i++)
+	//			f<<kcache->rprev[i]<<" ";
+	//	f<<endl;
 
-	for(int i=0; i<length;i++)
-			f<<kcache->rprev[i]<<" ";
-	f<<endl;
+		for(int i=0; i<length;i++)
+				f<<kcache->qnext[i]<<" ";
+		f<<endl;
 
-	for(int i=0; i<length;i++)
-			f<<kcache->qnext[i]<<" ";
-	f<<endl;
+		for(int i=0; i<length;i++)
+				f<<kcache->qprev[i]<<" ";
+		f<<endl;
 
-	for(int i=0; i<length;i++)
-			f<<kcache->qprev[i]<<" ";
-	f<<endl;
+		for(int i=0; i<length;i++)
+		{
+			for(int j=0;j<kcache->rsize[i];j++)
+				f<<kcache->rdata[i][j]<<" ";
+			if(kcache->rsize[i]!=0)
+				f<<endl;
+		}
 
-	for(int i=0; i<length;i++)
-	{
-		for(int j=0;j<kcache->rsize[i];j++)
-			f<<kcache->rdata[i][j]<<" ";
-		if(kcache->rsize[i]!=0)
-			f<<endl;
-	}
-
-	f.close();
-
+		f.close();
 }
 
 /*
