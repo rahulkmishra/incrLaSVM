@@ -852,7 +852,7 @@ void load_kcache_state(lasvm_kcache_t * &kcache, char* model_file_name)
 
 	if(kcache==NULL)
 	{
-		fprintf(stderr,"Error: Cannot load lasvm state \n");
+		fprintf(stderr,"Error: Cannot create kcache \n");
 		exit(1);
 	}
 
@@ -865,7 +865,7 @@ void load_kcache_state(lasvm_kcache_t * &kcache, char* model_file_name)
 	//TODO experiment with cursize instead of maxsize
 	if(cache_size*1024*1024<kcache->maxsize)
 	{
-		fprintf(stderr,"Error: Cache size smaller than previous\"%lld\"\n",kcache->maxsize);
+		fprintf(stderr,"Error: Cache size smaller than previous. It should be equal to or greater than \"%lld\"\n",kcache->maxsize);
 		exit(1);
 	}
 
@@ -876,7 +876,7 @@ void load_kcache_state(lasvm_kcache_t * &kcache, char* model_file_name)
 	//allocating memory first
 	initialize_kcache_load(kcache);
 
-	int i;
+	int i,tmp;
 	for(i=0;i<nl;i++)
 		f >> kcache->i2r[i];
 
@@ -889,11 +889,11 @@ void load_kcache_state(lasvm_kcache_t * &kcache, char* model_file_name)
 	for(i=0;i<nl;i++)
 		f >> kcache->rdiag[i];
 
-	for(i=0;i<nl;i++)
-		f >> kcache->rnext[i];
-
-	for(i=0;i<nl;i++)
-		f >> kcache->rprev[i];
+//	for(i=0;i<nl;i++)
+//		f >> tmp;
+//
+//	for(i=0;i<nl;i++)
+//		f >> tmp;
 
 	for(i=0;i<nl;i++)
 		f >> kcache->qnext[i];
@@ -917,8 +917,8 @@ void load_kcache_state(lasvm_kcache_t * &kcache, char* model_file_name)
 				f >> ndata[j];
 			kcache->rdata[i]=ndata;
 		}
-		else
-			kcache->rdata[i]=NULL;
+//		else
+//			kcache->rdata[i]=NULL;
 	}
 	f.close();
 	//return kcache;
@@ -945,15 +945,12 @@ void load_lasvm_state(lasvm_t * &sv, lasvm_kcache_t *kcache, char* model_file_na
 	f >> sumflag;
 
 	//int cp,cn;
-	f >> C_pos;
-	f >> C_neg;
-
 
 	//initialize
 	sv=lasvm_create(kcache,sumflag,C*C_pos,C*C_neg);
-	initialize_lasvm_load(sv);
 
 
+	//initialize_lasvm_load(sv);
 
 	if(sv==NULL)
 	{
@@ -962,34 +959,54 @@ void load_lasvm_state(lasvm_t * &sv, lasvm_kcache_t *kcache, char* model_file_na
 	}
 
 	//allocating memory first
-	initialize_lasvm_load(sv);
+	//initialize_lasvm_load(sv);
 
 	sv->sumflag = sumflag;
-	sv->cp = C_pos;
-	sv->cn = C_neg;
+	sv->cp = C*C_pos;
+	sv->cn = C*C_neg;
 	f >> sv->maxl;
 	f >> sv->s;
-	f >> sv->l;
+	//f >> sv->l;
 
-	int length=sv->maxl,i;
+	int save_l,*save_sv; double *save_g, *save_alpha;
+	f >> save_l;
+	sv->l = save_l;
+	//save_l=(int)lasvm_get_l(sv);
+	save_alpha= new double[save_l];
+	save_g= new double[save_l];
+	save_sv= new int[save_l];
+	//lasvm_get_sv(sv,save_sv);
+	//lasvm_get_alpha(sv,save_alpha);
+	//lasvm_get_g(sv,save_g);
+
+	int length=sv->l,i;
 
 	for(i=0;i<length;i++)
-		f >> sv->alpha[i];
+		f >> save_alpha[i];
+
+//	for(i=0;i<length;i++)
+//		f >> sv->cmin[i];
+//
+//	for(i=0;i<length;i++)
+//		f >> sv->cmax[i];
 
 	for(i=0;i<length;i++)
-		f >> sv->cmin[i];
+		f >> save_g[i];
 
 	for(i=0;i<length;i++)
-		f >> sv->cmax[i];
+		f >> save_sv[i];
 
-	for(i=0;i<length;i++)
-		f >> sv->g[i];
+	lasvm_init(sv, save_l, save_sv, save_alpha, save_g);
 
-	f >> sv->gmin;
-	f >> sv->gmax;
-	f >> sv->imin;
-	f >> sv->imax;
-	f >> sv->minmaxflag;
+	//delete save_l;
+	delete save_sv;
+	delete save_alpha;
+	delete save_g;
+//	f >> sv->gmin;
+//	f >> sv->gmax;
+//	f >> sv->imin;
+//	f >> sv->imax;
+//	f >> sv->minmaxflag;
 
 	f.close();
 	//return sv;
@@ -1014,8 +1031,7 @@ void train_online(char *model_file_name, char *temp_file_name)
 
 	// everything is new when we start
 	for(i=0;i<m;i++) inew.push_back(i);
-	make_old(0);
-
+	make_old(0); //dummy , else iold remains uninitialized later and therefore gives error
 
 	if(incrmode==2)//without persistence
 	{
@@ -1060,7 +1076,7 @@ void train_online(char *model_file_name, char *temp_file_name)
 		load_lasvm_state(sv, kcache, model_file_name);
 		sv->kernel = kcache;
 
-		printf("\n--- data loaded--- \n");
+
 
 		int index2;
 
@@ -1087,8 +1103,6 @@ void train_online(char *model_file_name, char *temp_file_name)
 
 	for(j=0;j<epochs;j++)
 	{
-//		t2=lasvm_reprocess(sv,epsgr);
-
 		for(i=history_size;i<m;i++)
 		{
 			if(inew.size()==0) break; // nothing more to select
@@ -1473,6 +1487,7 @@ int main(int argc, char **argv)
 	char temp_file_name[1024];
 	strcpy(temp_file_name,model_file_name);
 	strcat(temp_file_name,".history.temp");
+
 	setPreviousConfig(model_file_name);
 
 	preprocess_data(temp_file_name, input_file_name, model_file_name);

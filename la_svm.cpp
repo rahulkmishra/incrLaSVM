@@ -776,27 +776,36 @@ void dump_lasvm_state(lasvm_t *sv, char *model_file_name)
 
 	//write it to text file
 	f<<sv->sumflag<<endl;
-	f<<sv->cp<<endl;
-	f<<sv->cn<<endl;
+	//f<<sv->cp<<endl;
+	//f<<sv->cn<<endl;
 	f<<sv->maxl<<endl;
 	f<<sv->s<<endl;
 	f<<sv->l<<endl;
-	int length = sv->maxl;
+	int length = sv->l;
 	for(int i=0; i<length;i++)
 		f<<sv->alpha[i]<<" ";
 	f<<endl;
 
-	for(int i=0; i<length;i++)
-		f<<sv->cmin[i]<<" ";
-	f<<endl;
-
-	for(int i=0; i<length;i++)
-		f<<sv->cmax[i]<<" ";
-	f<<endl;
+//	for(int i=0; i<length;i++)
+//		f<<sv->cmin[i]<<" ";
+//	f<<endl;
+//
+//	for(int i=0; i<length;i++)
+//		f<<sv->cmax[i]<<" ";
+//	f<<endl;
 
 	for(int i=0; i<length;i++)
 		f<<sv->g[i]<<" ";
 	f<<endl;
+
+	int* save_sv= new int[length];
+	lasvm_get_sv(sv,save_sv);
+
+	for(int i=0; i<length;i++)
+		f<<save_sv[i]<<" ";
+	f<<endl;
+
+
 
 	f<<sv->gmin<<endl;
 	f<<sv->gmax<<endl;
@@ -849,13 +858,13 @@ void dump_kcache_state(lasvm_kcache_t *kcache, char *model_file_name)
 	f<<endl;
 
 
-	for(int i=0; i<length;i++)
-		f<<kcache->rnext[i]<<" ";
-	f<<endl;
-
-	for(int i=0; i<length;i++)
-			f<<kcache->rprev[i]<<" ";
-	f<<endl;
+//	for(int i=0; i<length;i++)
+//		f<<kcache->rnext[i]<<" ";
+//	f<<endl;
+//
+//	for(int i=0; i<length;i++)
+//			f<<kcache->rprev[i]<<" ";
+//	f<<endl;
 
 	for(int i=0; i<length;i++)
 			f<<kcache->qnext[i]<<" ";
