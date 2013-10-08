@@ -38,14 +38,14 @@ Source file is data.csv and from this 30% balanced test data is prepared as "tes
 The scaling parameter is provided in range.txt file.
 
 
-I. Training from scratch
+I. First time training 
 ------------------------
 
 For training the model without increment, example of the command that needs to be issued is:
 
 la_svm -c 16 –g 1 –p 2 –m 2000 \<input_file\> \<model_file\>
 
-For training the model incrementally with persistence, example of the command that needs to be issued is:
+For training the model having incremental nature with persistence, example of the command that needs to be issued is:
 
 la_svm –i 1 -c 16 –g 1 –p 2 –m 2000 \<input_file\> \<model_file\>
 
@@ -55,7 +55,7 @@ The files persisted are :
   3.  lasvm file(name: \<model_file\>.lasvm)
   4.  lacache file(name: \<model_file\>.lacache)
 
-For training the model incrementally without persistence, example of the command that needs to be issued is:
+For training the model having incremental nature without persistence(here, only model file is persisted), example of the command that needs to be issued is:
 
 la_svm –i 2 -c 16 –g 1 –p 2 –m 2000 \<input_file\> \<model_file\>
 
@@ -83,5 +83,5 @@ la_test \<input_file\> \<model_file\> \<output_file\>
 
 Usages:
 ========
-Complete usage details can be displayed by invoking the executables.
+Complete usage details can be displayed by invoking the corresponding executables.
 
